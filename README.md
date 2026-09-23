@@ -90,7 +90,9 @@ O **FileSense** lê os primeiros bytes de cada arquivo e compara o tipo real com
 
 **Seguro por padrão.** Modo de simulação, proteção contra sobrescrita, e downloads em andamento, arquivos ocultos e temporários são ignorados automaticamente.
 
-**Sem dependências.** Construído apenas com a biblioteca padrão do Python.
+**Interface gráfica.** Um app para Windows com menu lateral: organiza uma pasta com ou sem simulação, liga o modo contínuo com um interruptor, edita categorias e extensões, ajusta os nomes das pastas e desfaz a última operação. Sem terminal.
+
+**Sem dependências.** O núcleo e a linha de comando usam apenas a biblioteca padrão do Python. Só a interface gráfica usa uma biblioteca extra (`customtkinter`), já embutida no instalador.
 
 ## Instalação
 
@@ -126,6 +128,23 @@ pytest
 
 ## Uso
 
+### Interface gráfica
+
+Abra o **FileSense** pelo menu Iniciar. O menu lateral tem quatro telas:
+
+| Tela | O que faz |
+|:--|:--|
+| **Organizar** | Escolhe a pasta, mostra a simulação ou organiza de verdade. O interruptor **Vigiar automaticamente** faz o papel do `filesense vigiar` |
+| **Categorias** | Cria, edita e remove categorias: você define o nome da pasta e as extensões que vão para ela |
+| **Configurações** | Nomes das pastas especiais (Outros, suspeitos, duplicados) e subpastas por ano-mês |
+| **Histórico** | Lista as operações registradas e desfaz a última |
+
+As alterações feitas na interface são gravadas em `~/.filesense/filesense.toml`, o mesmo arquivo lido pela linha de comando.
+
+Para rodar a partir do código-fonte: `pip install -e . customtkinter` e depois `python gui.py`.
+
+### Linha de comando
+
 Sem uma pasta informada, o FileSense atua sobre `~/Downloads`.
 
 ```bash
@@ -149,7 +168,7 @@ filesense desfazer                 # reverte a última operação
 
 <br>
 
-**Windows.** Crie um atalho para `pythonw -m filesense vigiar` e coloque-o na pasta de inicialização (`Win + R` → `shell:startup`).
+**Windows.** Ao instalar pelo `FileSense-Setup.exe`, marque a opção "Abrir o FileSense ao ligar o computador". Pela linha de comando, crie um atalho para `pythonw -m filesense vigiar` e coloque-o na pasta de inicialização (`Win + R` → `shell:startup`).
 
 **macOS e Linux.** Agende a organização periódica com `cron`:
 
@@ -205,9 +224,15 @@ src/filesense/
 ├── history.py       Registro em JSON Lines e reversão
 ├── report.py        Estatísticas da pasta
 ├── watcher.py       Modo contínuo
-├── config.py        Configuração padrão e validação do TOML
+├── config.py        Configuração padrão, validação e gravação do TOML
 └── cli.py           Interface de linha de comando
+
+gui.py               Interface gráfica (usa o mesmo núcleo da linha de comando)
+installer/           Script do instalador do Windows (Inno Setup)
+.github/workflows/   CI e geração automática do instalador a cada tag
 ```
+
+A interface gráfica não duplica lógica: ela chama `planejar()`, `executar()`, `vigiar()` e o histórico, os mesmos usados pela CLI.
 
 ## Decisões técnicas
 
@@ -245,7 +270,8 @@ A suíte cobre classificação, detecção de ameaças, conflitos de nome, rever
 
 ## Roadmap
 
-- [ ] Interface gráfica com ícone na bandeja do sistema
+- [x] Interface gráfica e instalador para Windows
+- [ ] Ícone na bandeja do sistema
 - [ ] Regras baseadas em padrões de nome (ex.: `*nota*fiscal*` → Notas Fiscais)
 - [ ] Limpeza programada de `_Duplicados/` com confirmação
 - [ ] Publicação no PyPI
