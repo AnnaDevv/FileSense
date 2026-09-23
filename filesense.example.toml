@@ -1,0 +1,22 @@
+# Configuração do FileSense. Tudo aqui é opcional: apague o que não usar.
+
+[geral]
+# Cria subpastas por ano-mês (ex.: Imagens/2026-09)
+por_data = false
+
+# Só mexe em arquivos parados há pelo menos N segundos (evita pegar download em andamento)
+idade_minima_segundos = 5
+
+# Padrões extras para ignorar (somados aos padrões internos)
+ignorar = ["*.iso"]
+
+# Nomes das pastas especiais
+pasta_outros = "Outros"
+pasta_suspeitos = "_Verificar"
+pasta_duplicados = "_Duplicados"
+
+# Categorias novas ou alteradas. Uma extensão listada aqui sai da categoria padrão.
+[categorias]
+"Notas Fiscais" = ["xml"]
+"Modelos 3D" = ["stl", "obj", "blend", "3mf"]
+"Livros" = ["epub", "mobi", "azw3"]
