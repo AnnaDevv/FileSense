@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import json
 import tomllib
 from dataclasses import dataclass, field
 from pathlib import Path
@@ -69,6 +70,36 @@ _TIPOS_GERAL: dict[str, tuple[type, str]] = {
 
 def caminho_padrao() -> Path:
     return pasta_dados() / "filesense.toml"
+
+
+def _toml_texto(valor: str) -> str:
+    return json.dumps(valor, ensure_ascii=False)
+
+
+def _toml_lista(valores: list[str]) -> str:
+    return "[" + ", ".join(_toml_texto(v) for v in valores) + "]"
+
+
+def salvar_config(cfg: Config, caminho: Path | None = None) -> None:
+    """Escreve a configuração em TOML. Sem dependências externas: o formato usado
+    aqui (chaves simples + listas de strings) é simples o bastante pra montar à mão."""
+    caminho = Path(caminho) if caminho is not None else caminho_padrao()
+    caminho.parent.mkdir(parents=True, exist_ok=True)
+
+    linhas = ["[geral]"]
+    linhas.append(f"por_data = {'true' if cfg.por_data else 'false'}")
+    linhas.append(f"idade_minima_segundos = {cfg.idade_minima_segundos}")
+    ignorar_extra = [p for p in cfg.ignorar if p not in IGNORAR_PADRAO]
+    linhas.append(f"ignorar = {_toml_lista(ignorar_extra)}")
+    linhas.append(f"pasta_outros = {_toml_texto(cfg.pasta_outros)}")
+    linhas.append(f"pasta_suspeitos = {_toml_texto(cfg.pasta_suspeitos)}")
+    linhas.append(f"pasta_duplicados = {_toml_texto(cfg.pasta_duplicados)}")
+    linhas.append("")
+    linhas.append("[categorias]")
+    for nome, extensoes in cfg.categorias.items():
+        linhas.append(f"{_toml_texto(nome)} = {_toml_lista(extensoes)}")
+
+    caminho.write_text("\n".join(linhas) + "\n", encoding="utf-8")
 
 
 def carregar_config(caminho: Path | None = None) -> Config:

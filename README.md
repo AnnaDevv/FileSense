@@ -94,6 +94,14 @@ O **FileSense** lê os primeiros bytes de cada arquivo e compara o tipo real com
 
 ## Instalação
 
+### Windows (sem terminal)
+
+1. Abra a página de [Releases](../../releases/latest) e baixe o `FileSense-Setup.exe`.
+2. Dê dois cliques e siga o "Avançar". Não precisa de Python nem de administrador.
+3. Abra o FileSense pelo menu Iniciar. A configuração inicial é criada sozinha na primeira execução.
+
+### Linha de comando
+
 Requer **Python 3.11** ou superior.
 
 ```bash

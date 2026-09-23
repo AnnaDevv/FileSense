@@ -1,0 +1,30 @@
+name: Release
+
+# Ao criar uma tag (ex.: v1.0.0), gera o instalador do Windows e anexa à página de Releases.
+on:
+  push:
+    tags: ["v*"]
+
+permissions:
+  contents: write
+
+jobs:
+  instalador-windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Instalar dependências
+        run: pip install -e . customtkinter pyinstaller
+      - name: Gerar o executável
+        run: pyinstaller --onefile --noconsole --name FileSense --icon icon.ico --add-data "icon.ico;." gui.py
+      - name: Instalar o Inno Setup
+        run: choco install innosetup -y --no-progress
+      - name: Gerar o instalador
+        run: '& "C:\Program Files (x86)\Inno Setup 6\ISCC.exe" installer\filesense.iss'
+      - name: Publicar na Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: installer/Output/FileSense-Setup.exe
