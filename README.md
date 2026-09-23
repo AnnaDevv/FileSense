@@ -1,14 +1,35 @@
-# 🔍 FileSense
+<div align="center">
 
-**Organizador de arquivos que entende o que cada arquivo realmente é.** Arruma sua pasta de Downloads em segundos, encontra arquivos duplicados, detecta arquivos disfarçados (como um "boleto.pdf" que na verdade é um vírus) e desfaz qualquer ação com um único comando.
+# FileSense
 
-![CI](https://github.com/SEU-USUARIO/filesense/actions/workflows/ci.yml/badge.svg)
-![Python](https://img.shields.io/badge/python-3.11%2B-blue)
-![Dependências](https://img.shields.io/badge/depend%C3%AAncias-zero-brightgreen)
-![Licença](https://img.shields.io/badge/licen%C3%A7a-MIT-green)
+### Organização de arquivos guiada pelo conteúdo, não pelo nome.
+
+Classifica arquivos pela assinatura binária real, isola executáveis disfarçados,<br>
+elimina duplicados e mantém um histórico totalmente reversível.
+
+<br>
+
+[![CI](https://github.com/AnnaDevv/FileSense/actions/workflows/ci.yml/badge.svg)](https://github.com/AnnaDevv/FileSense/actions/workflows/ci.yml)
+![Python](https://img.shields.io/badge/Python-3.11%2B-3776AB?logo=python&logoColor=white)
+![Dependências](https://img.shields.io/badge/depend%C3%AAncias-zero-2ea44f)
+![Plataformas](https://img.shields.io/badge/Windows%20%7C%20macOS%20%7C%20Linux-555555)
+![Licença](https://img.shields.io/badge/licen%C3%A7a-MIT-blue)
+
+[Visão geral](#visão-geral) ·
+[Recursos](#recursos) ·
+[Instalação](#instalação) ·
+[Uso](#uso) ·
+[Arquitetura](#arquitetura) ·
+[Decisões técnicas](#decisões-técnicas) ·
+[Roadmap](#roadmap)
+
+</div>
+
+<br>
 
 ```text
 $ filesense organizar
+
 Organizando C:\Users\ana\Downloads
 
 _Verificar (2)
@@ -17,99 +38,125 @@ _Verificar (2)
   boleto_vencido_2via.pdf
     ⚠ diz ser .pdf, mas é um programa executável
 
-Áudios (1)
-  podcast_ep42.mp3
-
 Documentos (2)
-  anotacoes.txt
   Curriculo_Ana_Silva.pdf
+  anotacoes.txt
 
 Imagens (4)
-  comprovante_pix (1).png
-  comprovante_pix.png
   IMG_20260812_143022.jpg
+  comprovante_pix.png
+  comprovante_pix (1).png
   screenshot
 
 ✓ 12 arquivo(s) organizados (21.1 MB). Mudou de ideia? Rode: filesense desfazer
 ⚠ 1 arquivo(s) com cara de golpe foram para _Verificar/. Não abra antes de conferir.
 ```
 
-## O problema
+<br>
 
-A pasta Downloads de quase todo mundo vira um depósito: comprovantes, instaladores esquecidos, o mesmo PDF baixado três vezes, fotos sem nome. Organizar à mão é chato, e ferramentas simples que separam só pela extensão são enganadas facilmente.
+## Visão geral
 
-## O que o FileSense faz
+Pastas como *Downloads* acumulam comprovantes, instaladores esquecidos, o mesmo PDF baixado várias vezes e imagens sem nome. Organizadores convencionais separam tudo pela extensão, o que os torna fáceis de enganar: um executável renomeado para `boleto.pdf` é tratado como documento.
 
-| Comando | O que faz |
-|---|---|
-| `filesense organizar` | Separa os arquivos em pastas por tipo (Imagens, Documentos, Vídeos...) |
-| `filesense duplicados` | Encontra arquivos com conteúdo idêntico, mesmo com nomes diferentes |
-| `filesense relatorio` | Mostra o que ocupa espaço, o que está esquecido há meses e o que é suspeito |
-| `filesense vigiar` | Fica rodando e organiza cada arquivo novo assim que o download termina |
-| `filesense desfazer` | Devolve tudo da última ação para o lugar original |
-| `filesense historico` | Lista as últimas ações realizadas |
-| `filesense config` | Mostra a configuração ou cria um arquivo de exemplo |
+O **FileSense** lê os primeiros bytes de cada arquivo e compara o tipo real com o tipo declarado. A partir disso, organiza com precisão, sinaliza riscos e registra cada operação para que possa ser desfeita.
 
-Sem pasta informada, o alvo é `~/Downloads`. Qualquer pasta funciona: `filesense organizar D:\Fotos`.
+<table>
+<tr>
+<th align="left"></th>
+<th align="center">Organizador comum</th>
+<th align="center">FileSense</th>
+</tr>
+<tr><td>Classificação</td><td align="center">Pela extensão</td><td align="center"><b>Pelo conteúdo real</b></td></tr>
+<tr><td>Arquivos sem extensão</td><td align="center">Ignorados</td><td align="center"><b>Identificados</b></td></tr>
+<tr><td>Executáveis disfarçados</td><td align="center">Passam despercebidos</td><td align="center"><b>Isolados em quarentena</b></td></tr>
+<tr><td>Downloads corrompidos</td><td align="center">Não detectados</td><td align="center"><b>Sinalizados</b></td></tr>
+<tr><td>Duplicados</td><td align="center">Pelo nome</td><td align="center"><b>Pelo conteúdo (hash)</b></td></tr>
+<tr><td>Reverter operações</td><td align="center">Manual</td><td align="center"><b>Um comando</b></td></tr>
+</table>
 
-## Destaques
+## Recursos
 
-**Olha o conteúdo, não só o nome.** O FileSense lê os primeiros bytes de cada arquivo (as *magic bytes*) e compara com a extensão. Isso permite:
+**Classificação por assinatura binária.** Identifica mais de 20 formatos pelos *magic bytes*, incluindo contêineres ZIP (Office, instaladores MSIX), ISO Base Media (MP4, HEIC) e executáveis PE validados pela estrutura do cabeçalho.
 
-- classificar arquivos sem extensão (um `screenshot` sem `.png` vai para Imagens);
-- detectar **downloads que falharam**, como um `.pdf` que na verdade é uma página de erro HTML;
-- isolar **executáveis disfarçados** de documento em `_Verificar/`, um golpe comum por e-mail e WhatsApp.
+**Detecção de ameaças.** Executáveis que se passam por documentos são movidos para `_Verificar/` com um alerta explícito. Arquivos cujo conteúdo é uma página HTML de erro são reconhecidos como downloads que falharam.
 
-**Nunca apaga nada.** Duplicados vão para `_Duplicados/` para você revisar. Toda ação fica registrada e pode ser revertida com `filesense desfazer`.
+**Deduplicação eficiente.** Arquivos idênticos são encontrados em três etapas de custo crescente, e as cópias são movidas para revisão. Nada é apagado.
 
-**Seguro por padrão.** O modo `--simular` mostra o plano sem mover nada. Downloads em andamento (`.crdownload`, `.part`), arquivos ocultos, temporários do Office e arquivos modificados nos últimos segundos são ignorados. Nomes repetidos nunca são sobrescritos: o segundo vira `arquivo (1).pdf`.
+**Histórico reversível.** Toda operação é registrada. `filesense desfazer` restaura o estado anterior e remove as pastas que ficaram vazias.
 
-**Zero dependências.** Só a biblioteca padrão do Python. Funciona no Windows, macOS e Linux.
+**Modo contínuo.** `filesense vigiar` organiza cada novo arquivo assim que o download termina.
+
+**Relatórios.** Distribuição de espaço por categoria, maiores arquivos, arquivos inativos e itens suspeitos.
+
+**Seguro por padrão.** Modo de simulação, proteção contra sobrescrita, e downloads em andamento, arquivos ocultos e temporários são ignorados automaticamente.
+
+**Sem dependências.** Construído apenas com a biblioteca padrão do Python.
 
 ## Instalação
 
-Requer Python 3.11 ou mais recente.
+Requer **Python 3.11** ou superior.
 
 ```bash
-pip install git+https://github.com/SEU-USUARIO/filesense.git
+pip install git+https://github.com/AnnaDevv/FileSense.git
 ```
 
-Ou, para desenvolver:
+<details>
+<summary><b>Instalação para desenvolvimento</b></summary>
+
+<br>
 
 ```bash
-git clone https://github.com/SEU-USUARIO/filesense.git
-cd filesense
+git clone https://github.com/AnnaDevv/FileSense.git
+cd FileSense
+python -m venv .venv
+source .venv/bin/activate      # Windows: .venv\Scripts\Activate.ps1
 pip install -e ".[dev]"
+pytest
 ```
+
+</details>
 
 ## Uso
 
+Sem uma pasta informada, o FileSense atua sobre `~/Downloads`.
+
 ```bash
-filesense organizar --simular          # veja o plano antes de mexer em qualquer coisa
-filesense organizar                    # organiza ~/Downloads
-filesense organizar ~/Desktop --por-data   # cria subpastas como Imagens/2026-09
-
-filesense duplicados                   # lista duplicados e o espaço desperdiçado
-filesense duplicados --mover           # move as cópias para _Duplicados/
-
-filesense relatorio --dias 90          # arquivos sem uso há mais de 90 dias
-filesense vigiar --intervalo 5         # organiza automaticamente a cada 5 segundos
-filesense desfazer                     # reverte a última ação
+filesense organizar --simular      # exibe o plano sem alterar nada
+filesense organizar                # organiza a pasta
+filesense desfazer                 # reverte a última operação
 ```
 
-### Rodar automaticamente ao ligar o computador
+| Comando | Descrição |
+|:--|:--|
+| `organizar [pasta]` | Separa os arquivos em categorias. `--simular` para prévia, `--por-data` para subpastas por ano-mês |
+| `duplicados [pasta]` | Lista arquivos com conteúdo idêntico. `--mover` envia as cópias para `_Duplicados/` |
+| `relatorio [pasta]` | Exibe uso de espaço, arquivos inativos (`--dias N`) e itens suspeitos |
+| `vigiar [pasta]` | Organiza continuamente. `--intervalo N` define a frequência em segundos |
+| `desfazer` | Restaura os arquivos da operação mais recente |
+| `historico` | Lista as operações registradas |
+| `config` | Exibe a configuração ativa. `--criar` gera um arquivo de exemplo |
 
-**Windows:** crie um atalho para `pythonw -m filesense vigiar` na pasta `shell:startup` (abra com `Win+R`).
+<details>
+<summary><b>Execução automática</b></summary>
 
-**macOS/Linux:** adicione ao crontab (`crontab -e`) para organizar de hora em hora:
+<br>
+
+**Windows.** Crie um atalho para `pythonw -m filesense vigiar` e coloque-o na pasta de inicialização (`Win + R` → `shell:startup`).
+
+**macOS e Linux.** Agende a organização periódica com `cron`:
 
 ```cron
 0 * * * * filesense organizar
 ```
 
-## Configuração
+</details>
 
-Crie um arquivo de exemplo com `filesense config --criar`. Ele fica em `~/.filesense/filesense.toml`:
+<details>
+<summary><b>Configuração personalizada</b></summary>
+
+<br>
+
+Gere um arquivo de exemplo com `filesense config --criar`. Ele é salvo em `~/.filesense/filesense.toml`:
 
 ```toml
 [geral]
@@ -122,51 +169,87 @@ ignorar = ["*.iso"]
 "Modelos 3D" = ["stl", "obj", "blend"]
 ```
 
-Uma extensão listada numa categoria sua sai automaticamente da categoria padrão. Erros no arquivo geram mensagens claras, como `[geral].idade_minima_segundos deve ser um número inteiro`.
+Extensões atribuídas a uma categoria personalizada deixam de pertencer à categoria padrão. Valores inválidos produzem mensagens de erro específicas, como `[geral].idade_minima_segundos deve ser um número inteiro`.
 
-## Como funciona
+</details>
 
+## Arquitetura
+
+```mermaid
+flowchart LR
+    A[Arquivo] --> B[Classificador]
+    B -->|extensão + magic bytes| C{Tipos coincidem?}
+    C -->|sim| D[Categoria]
+    C -->|executável disfarçado<br>ou download corrompido| E[_Verificar]
+    D --> F[Planejador]
+    E --> F
+    F -->|--simular| G[Prévia]
+    F --> H[Executor]
+    H --> I[(Histórico)]
+    I -->|desfazer| J[Estado anterior]
 ```
+
+```text
 src/filesense/
-├── classifier.py   # extensão + magic bytes → categoria e alertas
-├── organizer.py    # planejar() decide, executar() move
-├── duplicates.py   # busca de duplicados em 3 etapas
-├── history.py      # registro em JSON Lines e desfazer
-├── report.py       # estatísticas da pasta
-├── watcher.py      # modo vigia por polling
-├── config.py       # padrões + TOML do usuário, com validação
-└── cli.py          # interface de linha de comando
+├── classifier.py    Identificação por extensão e assinatura binária
+├── organizer.py     Planejamento e execução das movimentações
+├── duplicates.py    Deduplicação em três etapas
+├── history.py       Registro em JSON Lines e reversão
+├── report.py        Estatísticas da pasta
+├── watcher.py       Modo contínuo
+├── config.py        Configuração padrão e validação do TOML
+└── cli.py           Interface de linha de comando
 ```
 
-Algumas decisões de projeto:
+## Decisões técnicas
 
-- **Planejar e executar são etapas separadas.** `planejar()` só calcula para onde cada arquivo iria e não toca no disco. Isso torna o `--simular` trivial e a lógica fácil de testar.
-- **Duplicados em 3 etapas.** Calcular o hash de tudo seria lento. Primeiro agrupa por tamanho (custo quase zero), depois compara o hash dos primeiros 64 KB e só então o hash completo dos candidatos que sobraram. Numa pasta com milhares de arquivos, a maioria é descartada sem ser lida por inteiro.
-- **Alertas só quando há certeza.** Um `.txt` não tem assinatura binária, então o FileSense nunca afirma que ele está "errado". Alertas de extensão só aparecem para formatos que dá para confirmar pelo conteúdo, o que evita falsos positivos.
-- **Executáveis confirmados pela estrutura PE.** Não basta começar com `MZ`: o FileSense segue o ponteiro do cabeçalho e confere a assinatura `PE\0\0`, como o próprio Windows faz.
-- **Histórico à prova de falhas.** Cada ação é uma linha JSON. Ao desfazer, o arquivo é regravado de forma atômica (`os.replace`), então nunca fica corrompido pela metade. O desfazer também se recusa a sobrescrever um arquivo novo que tenha aparecido no lugar original.
-- **Polling em vez de eventos do sistema.** O modo vigia verifica a pasta periodicamente. Funciona igual em qualquer sistema operacional, sem dependências, e combina com a regra de idade mínima que espera o download terminar.
+**Planejamento separado da execução.** `planejar()` calcula o destino de cada arquivo sem tocar no disco, e `executar()` aplica o plano. Essa separação torna o modo de simulação trivial e deixa a lógica de decisão testável de forma isolada.
 
-## Testes
+**Deduplicação em três etapas.** Calcular o hash de todos os arquivos seria custoso. Os candidatos são agrupados primeiro por tamanho, depois pelo hash dos primeiros 64 KB e, por fim, pelo hash completo (BLAKE2b). A maioria dos arquivos é descartada sem ser lida por inteiro.
+
+**Alertas apenas com evidência.** Formatos de texto não têm assinatura binária, então o FileSense nunca afirma que um `.txt` está incorreto. Divergências só são reportadas para formatos verificáveis pelo conteúdo, o que elimina falsos positivos.
+
+**Validação estrutural de executáveis.** O prefixo `MZ` não basta. O FileSense segue o ponteiro `e_lfanew` do cabeçalho DOS e confirma a assinatura `PE\0\0`, o mesmo critério usado pelo carregador do Windows.
+
+**Persistência atômica.** O histórico usa JSON Lines e é regravado com `os.replace`, garantindo que nunca fique em estado parcial. A reversão se recusa a sobrescrever arquivos que tenham surgido no local original.
+
+**Monitoramento por polling.** O modo contínuo verifica a pasta periodicamente em vez de depender de eventos do sistema operacional. O comportamento é idêntico em todas as plataformas, sem dependências, e se integra à regra de idade mínima que aguarda a conclusão dos downloads.
+
+<details>
+<summary><b>Estudo de caso: um bug encontrado em uso real</b></summary>
+
+<br>
+
+No primeiro uso sobre uma pasta *Downloads* real, um instalador `.msix` e um projeto do CorelDRAW (`.cdr`) foram classificados como arquivos compactados. Ambos são contêineres ZIP, e o FileSense recorria ao conteúdo sempre que não reconhecia a extensão.
+
+A correção teve duas partes: as extensões foram mapeadas para suas categorias corretas, e arquivos com extensão desconhecida e conteúdo ZIP passaram a ser enviados para *Outros*, já que muitos formatos modernos usam ZIP como contêiner. O cenário está coberto por testes de regressão em `tests/test_classifier.py`.
+
+</details>
+
+## Qualidade
 
 ```bash
-pytest -v
-ruff check .
+pytest -v          # 37 testes
+ruff check .       # lint
 ```
 
-A suíte cobre classificação, conflitos de nome, desfazer, duplicados (incluindo arquivos iguais no início e diferentes no fim), configuração inválida e a CLI. O CI roda tudo em Windows, macOS e Linux com Python 3.11, 3.12 e 3.13.
+A suíte cobre classificação, detecção de ameaças, conflitos de nome, reversão, deduplicação (incluindo arquivos idênticos no início e distintos no final), validação de configuração e a interface de linha de comando. A integração contínua executa tudo em **Windows, macOS e Linux** com **Python 3.11, 3.12 e 3.13**.
 
-## Próximos passos
+## Roadmap
 
-- [ ] Interface gráfica simples com ícone na bandeja do sistema
-- [ ] Regras por nome de arquivo (ex.: `*nota*fiscal*` → Notas Fiscais)
-- [ ] Limpeza automática de `_Duplicados/` após N dias, com confirmação
+- [ ] Interface gráfica com ícone na bandeja do sistema
+- [ ] Regras baseadas em padrões de nome (ex.: `*nota*fiscal*` → Notas Fiscais)
+- [ ] Limpeza programada de `_Duplicados/` com confirmação
 - [ ] Publicação no PyPI
-
-## Um bug real que virou teste
-
-No primeiro uso numa pasta Downloads de verdade, um instalador `.msix` e um projeto do CorelDRAW (`.cdr`) foram parar em *Compactados*. Os dois são arquivos ZIP por dentro, e o FileSense confiava no conteúdo quando não conhecia a extensão. A correção: extensões conhecidas foram adicionadas, e um arquivo de extensão desconhecida com ZIP por dentro agora vai para *Outros*, porque muitos formatos modernos usam ZIP como contêiner. O caso está coberto em `tests/test_classifier.py`.
 
 ## Licença
 
-MIT. Veja [LICENSE](LICENSE).
+Distribuído sob a licença MIT. Consulte [LICENSE](LICENSE) para mais detalhes.
+
+<br>
+
+<div align="center">
+
+Desenvolvido por **[Ana Silva](https://github.com/AnnaDevv)**
+
+</div>
