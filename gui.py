@@ -386,9 +386,18 @@ class App(ctk.CTk):
         pagina.grid(row=0, column=1, sticky="nsew")
         self.paginas["categorias"] = pagina
 
+        cabecalho = ctk.CTkFrame(pagina, fg_color="transparent")
+        cabecalho.pack(fill="x", padx=PAD, pady=(26, 6))
         ctk.CTkLabel(
-            pagina, text="Categorias", font=ctk.CTkFont(family=FONTE, size=19, weight="bold"), anchor="w",
-        ).pack(fill="x", padx=PAD, pady=(26, 6))
+            cabecalho, text="Categorias", font=ctk.CTkFont(family=FONTE, size=19, weight="bold"), anchor="w",
+        ).pack(side="left")
+        botao_secundario(cabecalho, text="Remover", width=84, command=self._remover_categoria).pack(side="right")
+        botao_secundario(cabecalho, text="Editar", width=76, command=self._editar_categoria).pack(
+            side="right", padx=6
+        )
+        botao_secundario(cabecalho, text="+ Nova categoria", width=130, command=self._nova_categoria).pack(
+            side="right"
+        )
         ctk.CTkLabel(
             pagina, text="Cada categoria vira uma subpasta. Uma extensão só pode estar em uma categoria.",
             text_color=cor_secundaria(), anchor="w", font=ctk.CTkFont(family=FONTE, size=12),
@@ -401,18 +410,8 @@ class App(ctk.CTk):
         self.tabela_categorias.column("nome", width=180, anchor="w", stretch=False)
         self.tabela_categorias.heading("extensoes", text="Extensões")
         self.tabela_categorias.column("extensoes", width=400, anchor="w", stretch=True)
-        self.tabela_categorias.pack(fill="both", expand=True, padx=PAD)
+        self.tabela_categorias.pack(fill="both", expand=True, padx=PAD, pady=(0, 24))
         self.tabela_categorias.bind("<<TreeviewSelect>>", self._selecionar_categoria)
-
-        botoes = ctk.CTkFrame(pagina, fg_color="transparent")
-        botoes.pack(fill="x", padx=PAD, pady=(12, 24))
-        botao_secundario(botoes, text="+ Nova categoria", width=140, command=self._nova_categoria).pack(
-            side="left"
-        )
-        botao_secundario(botoes, text="Editar", width=110, command=self._editar_categoria).pack(
-            side="left", padx=8
-        )
-        botao_secundario(botoes, text="Remover", width=110, command=self._remover_categoria).pack(side="left")
 
     def _estilizar_tabelas(self):
         escuro = ctk.get_appearance_mode() == "Dark"
@@ -547,9 +546,14 @@ class App(ctk.CTk):
         pagina.grid(row=0, column=1, sticky="nsew")
         self.paginas["historico"] = pagina
 
+        cabecalho = ctk.CTkFrame(pagina, fg_color="transparent")
+        cabecalho.pack(fill="x", padx=PAD, pady=(26, 16))
         ctk.CTkLabel(
-            pagina, text="Histórico", font=ctk.CTkFont(family=FONTE, size=19, weight="bold"), anchor="w",
-        ).pack(fill="x", padx=PAD, pady=(26, 16))
+            cabecalho, text="Histórico", font=ctk.CTkFont(family=FONTE, size=19, weight="bold"), anchor="w",
+        ).pack(side="left")
+        botao_secundario(cabecalho, text="Desfazer última ação", width=170, command=self._desfazer).pack(
+            side="right"
+        )
 
         self.tabela_historico = ttk.Treeview(
             pagina, columns=("quando", "acao", "pasta", "qtd"), show="headings", height=12
@@ -559,11 +563,7 @@ class App(ctk.CTk):
         ]:
             self.tabela_historico.heading(col, text=titulo)
             self.tabela_historico.column(col, width=largura, anchor="w", stretch=(col == "pasta"))
-        self.tabela_historico.pack(fill="both", expand=True, padx=PAD)
-
-        botao_secundario(pagina, text="Desfazer última ação", width=180, command=self._desfazer).pack(
-            anchor="w", padx=PAD, pady=(12, 24)
-        )
+        self.tabela_historico.pack(fill="both", expand=True, padx=PAD, pady=(0, 24))
 
     def _atualizar_lista_historico(self):
         self.tabela_historico.delete(*self.tabela_historico.get_children())
